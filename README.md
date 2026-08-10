@@ -24,25 +24,25 @@ Rebuilt from a simple single-user demo into something you can actually rely on d
 
 ## 2. Run it locally
 
-```bash
+\`\`\`bash
 npm install
 cp .env.example .env
 # paste your Supabase URL + anon key into .env
 npm run dev
-```
+\`\`\`
 
 Visit `http://localhost:5173`, sign up, and start logging expenses.
 
 ## 3. Push to GitHub
 
-```bash
+\`\`\`bash
 git init
 git add .
 git commit -m "CashFlow: full-stack expense tracker"
 git branch -M main
 git remote add origin https://github.com/<your-username>/<your-repo>.git
 git push -u origin main
-```
+\`\`\`
 
 ## 4. Deploy on Vercel
 
@@ -57,7 +57,7 @@ git push -u origin main
 
 ## Project structure
 
-```
+\`\`\`
 src/
   components/     UI pieces: forms, nav, charts, budget progress bars
   contexts/       AuthContext (Supabase session)
@@ -66,7 +66,7 @@ src/
   utils/          category list, currency/date helpers, CSV export, recurring engine
 supabase/
   schema.sql      tables + Row Level Security policies
-```
+\`\`\`
 
 ## Notes on the recurring engine
 
