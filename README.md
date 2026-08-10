@@ -1,4 +1,4 @@
-# Tallybook — Personal Expense Tracker
+# CashFlow — Personal Expense Tracker
 
 A full-stack expense tracker built with **React + Tailwind CSS + Supabase (PostgreSQL + Auth)**, ready to deploy on **Vercel**.
 
@@ -7,7 +7,7 @@ Rebuilt from a simple single-user demo into something you can actually rely on d
 - 🔐 **Real accounts** — Supabase email/password auth, every user only sees their own data (enforced by Postgres Row Level Security, not just app logic)
 - 💰 **Budgets with alerts** — set a monthly cap per category, see progress bars, get flagged when you're near or over budget
 - 📊 **Dashboard charts** — spend-by-category pie chart and a 6-month income vs. expense trend, built with Recharts
-- 🔁 **Recurring transactions** — set up rent, subscriptions, or salary once; Tallybook automatically logs each occurrence as its due date arrives, even catching up on missed periods
+- 🔁 **Recurring transactions** — set up rent, subscriptions, or salary once; CashFlow automatically logs each occurrence as its due date arrives, even catching up on missed periods
 - 📅 **Filtering + CSV export** — filter expenses by category and date range, export to CSV for taxes or sharing
 - 📈 **Income tracking** — log income separately and see net savings (income − expenses) per month
 
@@ -24,25 +24,25 @@ Rebuilt from a simple single-user demo into something you can actually rely on d
 
 ## 2. Run it locally
 
-```bash
+\`\`\`bash
 npm install
 cp .env.example .env
 # paste your Supabase URL + anon key into .env
 npm run dev
-```
+\`\`\`
 
 Visit `http://localhost:5173`, sign up, and start logging expenses.
 
 ## 3. Push to GitHub
 
-```bash
+\`\`\`bash
 git init
 git add .
-git commit -m "Tallybook: full-stack expense tracker"
+git commit -m "CashFlow: full-stack expense tracker"
 git branch -M main
 git remote add origin https://github.com/<your-username>/<your-repo>.git
 git push -u origin main
-```
+\`\`\`
 
 ## 4. Deploy on Vercel
 
@@ -57,7 +57,7 @@ git push -u origin main
 
 ## Project structure
 
-```
+\`\`\`
 src/
   components/     UI pieces: forms, nav, charts, budget progress bars
   contexts/       AuthContext (Supabase session)
@@ -66,7 +66,7 @@ src/
   utils/          category list, currency/date helpers, CSV export, recurring engine
 supabase/
   schema.sql      tables + Row Level Security policies
-```
+\`\`\`
 
 ## Notes on the recurring engine
 
