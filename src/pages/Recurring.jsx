@@ -43,7 +43,7 @@ export default function Recurring() {
         <div>
           <h1 className="font-display text-2xl font-semibold text-ink">Recurring</h1>
           <p className="text-ink-soft text-sm mt-1">
-            Rent, subscriptions, salary — set once and Tallybook logs each occurrence for you.
+            Rent, subscriptions, salary — set once and CashFlow logs each occurrence for you.
           </p>
         </div>
         <button

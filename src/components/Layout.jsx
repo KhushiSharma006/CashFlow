@@ -31,7 +31,7 @@ export default function Layout({ children }) {
         <div className="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-display text-2xl font-semibold tracking-tight text-ink">
-              Tallybook
+              CashFlow
             </span>
             <span className="hidden sm:inline-block font-mono text-[11px] uppercase tracking-widest text-ink-soft border border-line rounded-full px-2 py-0.5">
               personal ledger

@@ -150,7 +150,7 @@ export default function RecurringForm({ userId, onDone, onCancel }) {
           )}
 
           <p className="text-xs text-ink-soft mt-3">
-            Tallybook auto-generates each occurrence as a real entry once its date arrives — no manual re-entry needed.
+            CashFlow auto-generates each occurrence as a real entry once its date arrives — no manual re-entry needed.
           </p>
 
           <div className="flex gap-2 mt-4">

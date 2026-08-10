@@ -38,7 +38,7 @@ export default function Signup() {
     <div className="min-h-screen bg-paper flex items-center justify-center px-5">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-semibold text-ink">Tallybook</h1>
+          <h1 className="font-display text-3xl font-semibold text-ink">CashFlow</h1>
           <p className="text-ink-soft text-sm mt-1">Open a new ledger.</p>
         </div>
 
