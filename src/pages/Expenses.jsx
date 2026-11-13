@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import { useHouseholds } from '../hooks/useHouseholds'
 import ExpenseForm from '../components/ExpenseForm'
 import { EXPENSE_CATEGORIES, formatCurrency, formatDate } from '../utils/constants'
 import { exportExpensesToCSV } from '../utils/csvExport'
 
 export default function Expenses() {
   const { user } = useAuth()
+  const { households } = useHouseholds(user)
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -16,13 +18,18 @@ export default function Expenses() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
 
+  const householdName = (id) => households.find((h) => h.id === id)?.name
+
   const loadExpenses = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('expenses')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('expense_date', { ascending: false })
+    const householdIds = households.map((h) => h.id)
+
+    let query = supabase.from('expenses').select('*')
+    query = householdIds.length > 0
+      ? query.or(`user_id.eq.${user.id},household_id.in.(${householdIds.join(',')})`)
+      : query.eq('user_id', user.id)
+
+    const { data } = await query.order('expense_date', { ascending: false })
     setExpenses(data || [])
     setLoading(false)
   }
@@ -30,7 +37,7 @@ export default function Expenses() {
   useEffect(() => {
     loadExpenses()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [households.length])
 
   const filtered = useMemo(() => {
     return expenses.filter((e) => {
@@ -116,9 +123,17 @@ export default function Expenses() {
           {filtered.map((e) => (
             <div key={e.id} className="ledger-row flex items-center justify-between px-5 py-3.5 hover:bg-paper-raised transition-colors">
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-ink">{e.category}</span>
                   <span className="text-xs text-ink-soft font-mono">{formatDate(e.expense_date)}</span>
+                  {e.household_id && (
+                    <span className="text-[10px] font-mono uppercase tracking-wide text-ink-soft border border-line rounded-full px-1.5 py-0.5">
+                      {householdName(e.household_id) || 'shared'}
+                    </span>
+                  )}
+                  {e.household_id && e.user_id !== user.id && (
+                    <span className="text-xs text-ink-soft">by a household member</span>
+                  )}
                 </div>
                 {e.description && <p className="text-sm text-ink-soft truncate">{e.description}</p>}
               </div>
@@ -138,6 +153,7 @@ export default function Expenses() {
         <ExpenseForm
           userId={user.id}
           existing={editing}
+          households={households}
           onDone={() => { setShowForm(false); loadExpenses() }}
           onCancel={() => setShowForm(false)}
         />

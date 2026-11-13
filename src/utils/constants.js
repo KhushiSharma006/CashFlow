@@ -45,8 +45,23 @@ export function formatDate(dateStr) {
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
+/**
+ * Formats a Date as YYYY-MM-DD using the *local* calendar date.
+ *
+ * Do not use date.toISOString().slice(0, 10) for this: toISOString()
+ * converts to UTC first, so in any timezone ahead of UTC (e.g. India,
+ * UTC+5:30) a local-midnight date serializes as the previous day, and
+ * "today" reads as yesterday before 5:30 AM.
+ */
+export function toLocalISODate(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10)
+  return toLocalISODate(new Date())
 }
 
 export function monthLabel(year, monthIndex) {

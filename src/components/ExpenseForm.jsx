@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { EXPENSE_CATEGORIES, todayISO } from '../utils/constants'
 
-export default function ExpenseForm({ userId, existing, onDone, onCancel }) {
+export default function ExpenseForm({ userId, existing, households = [], onDone, onCancel }) {
   const [amount, setAmount] = useState(existing?.amount ?? '')
   const [category, setCategory] = useState(existing?.category ?? EXPENSE_CATEGORIES[0])
   const [description, setDescription] = useState(existing?.description ?? '')
   const [date, setDate] = useState(existing?.expense_date ?? todayISO())
+  const [householdId, setHouseholdId] = useState(existing?.household_id ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,6 +26,7 @@ export default function ExpenseForm({ userId, existing, onDone, onCancel }) {
       category,
       description: description || null,
       expense_date: date,
+      household_id: householdId || null,
     }
 
     const { error } = existing
@@ -95,6 +97,25 @@ export default function ExpenseForm({ userId, existing, onDone, onCancel }) {
               placeholder="e.g. Groceries at DMart"
             />
           </div>
+
+          {households.length > 0 && (
+            <div className="mb-2">
+              <label className="block text-sm font-medium text-ink mb-1.5">Visibility</label>
+              <select
+                value={householdId}
+                onChange={(e) => setHouseholdId(e.target.value)}
+                className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-brass outline-none bg-surface"
+              >
+                <option value="">Personal only</option>
+                {households.map((h) => (
+                  <option key={h.id} value={h.id}>Shared with {h.name}</option>
+                ))}
+              </select>
+              <p className="text-xs text-ink-soft mt-1">
+                Sharing counts this expense toward that household's budget — all members can see and manage it.
+              </p>
+            </div>
+          )}
 
           {error && (
             <p className="text-rust text-sm mt-2 bg-rust-soft rounded-md px-3 py-2">{error}</p>

@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import { useHouseholds } from '../hooks/useHouseholds'
 import BudgetForm from '../components/BudgetForm'
 import BudgetProgress from '../components/BudgetProgress'
 import { todayISO } from '../utils/constants'
 
 export default function Budgets() {
   const { user } = useAuth()
+  const { households } = useHouseholds(user)
   const [budgets, setBudgets] = useState([])
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -17,9 +19,24 @@ export default function Budgets() {
 
   const loadData = async () => {
     setLoading(true)
+    const householdIds = households.map((h) => h.id)
+
+    // Budgets: personal ones, plus any budget belonging to a household I'm
+    // a member of. RLS would enforce this anyway, but filtering explicitly
+    // keeps the query intent clear and avoids over-fetching.
+    let budgetsQuery = supabase.from('budgets').select('*')
+    budgetsQuery = householdIds.length > 0
+      ? budgetsQuery.or(`user_id.eq.${user.id},household_id.in.(${householdIds.join(',')})`)
+      : budgetsQuery.eq('user_id', user.id)
+
+    let expensesQuery = supabase.from('expenses').select('*').gte('expense_date', monthStart)
+    expensesQuery = householdIds.length > 0
+      ? expensesQuery.or(`user_id.eq.${user.id},household_id.in.(${householdIds.join(',')})`)
+      : expensesQuery.eq('user_id', user.id)
+
     const [budgetsRes, expensesRes] = await Promise.all([
-      supabase.from('budgets').select('*').eq('user_id', user.id).order('category'),
-      supabase.from('expenses').select('*').eq('user_id', user.id).gte('expense_date', monthStart),
+      budgetsQuery.order('category'),
+      expensesQuery,
     ])
     setBudgets(budgetsRes.data || [])
     setExpenses(expensesRes.data || [])
@@ -29,18 +46,21 @@ export default function Budgets() {
   useEffect(() => {
     loadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [households.length])
+
+  const householdName = (id) => households.find((h) => h.id === id)?.name
 
   const budgetsWithSpend = useMemo(
     () =>
       budgets.map((b) => ({
         ...b,
-        spent: expenses.filter((e) => e.category === b.category).reduce((s, e) => s + Number(e.amount), 0),
+        spent: expenses
+          .filter((e) => e.category === b.category)
+          .filter((e) => (b.household_id ? e.household_id === b.household_id : !e.household_id && e.user_id === user.id))
+          .reduce((s, e) => s + Number(e.amount), 0),
       })),
-    [budgets, expenses]
+    [budgets, expenses, user.id]
   )
-
-  const takenCategories = budgets.map((b) => b.category)
 
   const handleDelete = async (id) => {
     if (!confirm('Remove this budget?')) return
@@ -77,6 +97,7 @@ export default function Budgets() {
               category={b.category}
               spent={b.spent}
               limit={Number(b.monthly_limit)}
+              householdName={b.household_id ? householdName(b.household_id) : null}
               onEdit={() => { setEditing(b); setShowForm(true) }}
               onDelete={() => handleDelete(b.id)}
             />
@@ -88,7 +109,8 @@ export default function Budgets() {
         <BudgetForm
           userId={user.id}
           existing={editing}
-          takenCategories={takenCategories}
+          allBudgets={budgets}
+          households={households}
           onDone={() => { setShowForm(false); loadData() }}
           onCancel={() => setShowForm(false)}
         />

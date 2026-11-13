@@ -1,16 +1,34 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { EXPENSE_CATEGORIES } from '../utils/constants'
 
-export default function BudgetForm({ userId, existing, takenCategories, onDone, onCancel }) {
-  const availableCategories = existing
-    ? EXPENSE_CATEGORIES
-    : EXPENSE_CATEGORIES.filter((c) => !takenCategories.includes(c))
-
-  const [category, setCategory] = useState(existing?.category ?? availableCategories[0] ?? '')
+export default function BudgetForm({ userId, existing, allBudgets, households = [], onDone, onCancel }) {
+  const [scope, setScope] = useState(existing?.household_id ?? '')
+  const [category, setCategory] = useState(existing?.category ?? '')
   const [limit, setLimit] = useState(existing?.monthly_limit ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Which categories already have a budget *in the currently selected scope*
+  // (personal, or a specific household) — uniqueness is scoped, not global.
+  const takenCategories = useMemo(() => {
+    return allBudgets
+      .filter((b) => (scope ? b.household_id === scope : !b.household_id))
+      .filter((b) => b.id !== existing?.id)
+      .map((b) => b.category)
+  }, [allBudgets, scope, existing])
+
+  const availableCategories = EXPENSE_CATEGORIES.filter((c) => !takenCategories.includes(c))
+
+  const handleScopeChange = (newScope) => {
+    setScope(newScope)
+    const stillAvailable = EXPENSE_CATEGORIES.filter(
+      (c) => !allBudgets.some((b) => (newScope ? b.household_id === newScope : !b.household_id) && b.category === c && b.id !== existing?.id)
+    )
+    if (!stillAvailable.includes(category)) {
+      setCategory(stillAvailable[0] ?? '')
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -25,7 +43,12 @@ export default function BudgetForm({ userId, existing, takenCategories, onDone, 
     }
     setSaving(true)
 
-    const payload = { user_id: userId, category, monthly_limit: Number(limit) }
+    const payload = {
+      user_id: userId,
+      category,
+      monthly_limit: Number(limit),
+      household_id: scope || null,
+    }
 
     const { error } = existing
       ? await supabase.from('budgets').update(payload).eq('id', existing.id)
@@ -33,11 +56,13 @@ export default function BudgetForm({ userId, existing, takenCategories, onDone, 
 
     setSaving(false)
     if (error) {
-      setError(error.message.includes('duplicate') ? 'You already have a budget for this category.' : error.message)
+      setError(error.message.includes('duplicate') ? 'That category already has a budget in this scope.' : error.message)
       return
     }
     onDone()
   }
+
+  const effectiveCategory = category || availableCategories[0] || ''
 
   return (
     <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-30 px-4">
@@ -48,14 +73,31 @@ export default function BudgetForm({ userId, existing, takenCategories, onDone, 
 
         {availableCategories.length === 0 && !existing ? (
           <p className="text-sm text-ink-soft">
-            You've set a budget for every category already. Edit an existing one instead.
+            Every category already has a budget in this scope. Choose a different household above, or edit an existing budget instead.
           </p>
         ) : (
           <form onSubmit={handleSubmit}>
+            {households.length > 0 && (
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-ink mb-1.5">Scope</label>
+                <select
+                  value={scope}
+                  disabled={!!existing}
+                  onChange={(e) => handleScopeChange(e.target.value)}
+                  className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-brass outline-none bg-surface disabled:opacity-60"
+                >
+                  <option value="">Personal</option>
+                  {households.map((h) => (
+                    <option key={h.id} value={h.id}>{h.name} (shared)</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="mb-3">
               <label className="block text-sm font-medium text-ink mb-1.5">Category</label>
               <select
-                value={category}
+                value={effectiveCategory}
                 disabled={!!existing}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full rounded-md border border-line px-3 py-2 text-sm focus:border-brass outline-none bg-surface disabled:opacity-60"

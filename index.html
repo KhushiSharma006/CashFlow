@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CashFlow — Expense Tracker</title>
     <meta name="description" content="A personal expense and budget tracker: log spending, set monthly budgets, track income, and automate recurring bills." />
+    <meta name="theme-color" content="#1F2D3D" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CashFlow" />
+    <script>
+      // Set the theme before first paint so there's no flash of the wrong
+      // theme. Mirrors the logic in src/utils/theme.js — duplicated here
+      // deliberately since this has to run before any JS module loads.
+      (function () {
+        var stored = localStorage.getItem('cashflow-theme')
+        var theme = stored === 'light' || stored === 'dark'
+          ? stored
+          : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

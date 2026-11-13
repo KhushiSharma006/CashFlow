@@ -6,7 +6,7 @@ import { runRecurringEngine } from '../utils/recurring'
 import StatCard from '../components/StatCard'
 import BudgetProgress from '../components/BudgetProgress'
 import { CategoryPieChart, MonthlyTrendChart } from '../components/ChartsSection'
-import { formatCurrency, lastNMonths, monthKeyFromDate, todayISO } from '../utils/constants'
+import { formatCurrency, lastNMonths, monthKeyFromDate, todayISO, toLocalISODate } from '../utils/constants'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -20,7 +20,7 @@ export default function Dashboard() {
     const d = new Date()
     d.setMonth(d.getMonth() - 5)
     d.setDate(1)
-    return d.toISOString().slice(0, 10)
+    return toLocalISODate(d)
   }, [])
 
   const loadData = async () => {

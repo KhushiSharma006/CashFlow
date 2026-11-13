@@ -16,6 +16,33 @@
   --sage-soft: #D9E3D6;
 }
 
+/*
+ * Dark mode. The JS theme hook (src/hooks/useTheme.js) and the anti-flash
+ * inline script in index.html always set data-theme explicitly before
+ * paint — either "light" or "dark" — so this selector alone is enough;
+ * no prefers-color-scheme media query needed in CSS, since the JS side
+ * already resolved system preference into a concrete choice.
+ *
+ * Note --ink in dark mode is nearly the same warm cream as light mode's
+ * --paper, and --paper here is a near-black navy — a deliberate nod to
+ * the ledger motif: dark mode reads like ink on a night ledger rather
+ * than an unrelated dark theme bolted on.
+ */
+:root[data-theme="dark"] {
+  --ink: #EDE7D8;
+  --ink-soft: #9CA7B5;
+  --paper: #11161D;
+  --paper-raised: #171D26;
+  --surface: #1C232E;
+  --line: #2E3744;
+  --brass: #D4AF5A;
+  --brass-soft: #3A331F;
+  --rust: #E0836A;
+  --rust-soft: #3A2420;
+  --sage: #8FB89D;
+  --sage-soft: #223229;
+}
+
 @theme {
   --font-display: 'Fraunces', serif;
   --font-body: 'Inter', sans-serif;
@@ -49,6 +76,7 @@ body {
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 .font-display {

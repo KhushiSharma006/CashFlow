@@ -1,6 +1,6 @@
 import { formatCurrency } from '../utils/constants'
 
-export default function BudgetProgress({ category, spent, limit, onEdit, onDelete, readOnly = false }) {
+export default function BudgetProgress({ category, spent, limit, onEdit, onDelete, readOnly = false, householdName }) {
   const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0
   const overPct = limit > 0 ? (spent / limit) * 100 : 0
 
@@ -21,7 +21,14 @@ export default function BudgetProgress({ category, spent, limit, onEdit, onDelet
     <div className="bg-surface border border-line rounded-xl p-5">
       <div className="flex items-start justify-between mb-2">
         <div>
-          <p className="font-medium text-ink">{category}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-medium text-ink">{category}</p>
+            {householdName && (
+              <span className="text-[10px] font-mono uppercase tracking-wide text-ink-soft border border-line rounded-full px-1.5 py-0.5">
+                {householdName}
+              </span>
+            )}
+          </div>
           <p className={`text-xs font-medium ${statusColor}`}>{status}</p>
         </div>
         {!readOnly && (
